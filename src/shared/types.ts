@@ -59,6 +59,18 @@ export interface FindState {
   matches: number;
 }
 
+/**
+ * Hangar's own updates (src/main/updates.ts). New versions download by themselves; "ready" is one waiting for a
+ * restart, which also happens by itself the next time Hangar quits.
+ */
+export type UpdateState =
+  | { phase: 'off'; reason: 'source' | 'switched-off' }
+  | { phase: 'idle'; checkedAt?: number }
+  | { phase: 'checking' }
+  | { phase: 'downloading'; version: string; percent: number }
+  | { phase: 'ready'; version: string }
+  | { phase: 'error'; message: string; checkedAt: number };
+
 /** What's covering the app area, if anything. While a sheet is open the app is shown as a still behind it. */
 export type Sheet = null | { kind: 'settings' } | { kind: 'add' } | { kind: 'edit'; id: string };
 
@@ -81,6 +93,7 @@ export interface ShellState {
   platform: NodeJS.Platform;
   /** False when run from source (`npm start`), where opening at sign-in can't work. */
   packaged: boolean;
+  update: UpdateState;
 }
 
 export type Command =
@@ -107,7 +120,9 @@ export type Command =
   | { type: 'showDownload'; id: string }
   | { type: 'openDownload'; id: string }
   | { type: 'clearDownloads' }
-  | { type: 'focusApp' };
+  | { type: 'focusApp' }
+  | { type: 'checkForUpdates' }
+  | { type: 'restartToUpdate' };
 
 /** The answer to a command that can fail with something to tell the owner (adding or editing an app). */
 export type CommandResult = { ok: true } | { ok: false; message: string };

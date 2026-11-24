@@ -31,3 +31,12 @@ $env:HANGAR_DATA = "$PWD\.smoke\try"; npm start
 
 `HANGAR_DATA` moves Hangar's saved state and sign-ins to that folder, and `HANGAR_APPS` sets the apps for a folder
 with nothing saved yet.
+
+## Testing an update
+
+Updating needs an installed copy, so test it under another name, never the owner's own Hangar. Build two versions
+from a copy of `package.json`'s `build` settings that changes `appId`, `productName`, `extraMetadata.name` (the install
+folder) and `extraMetadata.version`, and points `publish` at a generic URL on this computer. Serve the newer build's
+folder there with `scripts/serve-static.mjs` and run the older one: it finds, downloads and offers the newer within
+seconds. It also installs the newer one when it quits (that's what it's for), so remove the test app from Windows'
+installed apps afterwards. `HANGAR_UPDATES=off` stops an installed copy updating at all.

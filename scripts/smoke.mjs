@@ -66,6 +66,12 @@ async function snap(name, crops = {}) {
 function capture(crops) {
   return app.evaluate(async ({ nativeImage }, crops) => {
     const h = globalThis.hangar;
+    // Let anything arriving finish arriving (a sheet rising, a panel fading in), so the picture is of where it ends
+    // up. Endless ones (the fan at idle, the contrail) are left running.
+    await h.shellView.webContents.executeJavaScript(`Promise.race([
+      Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => null))),
+      new Promise((done) => setTimeout(done, 1500)),
+    ]).then(() => null)`);
     const shell = await h.shellView.webContents.capturePage();
     const scale = shell.getSize().width / h.shellView.getBounds().width;
     const view = h.win.contentView.children.find((v) => v !== h.shellView && v.getVisible());

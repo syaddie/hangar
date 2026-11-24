@@ -80,6 +80,7 @@ export const ICON = {
   up: icon('<path d="M6 15l6-6 6 6"/>'),
   down: icon('<path d="M6 9l6 6 6-6"/>'),
   plus: icon('<path d="M12 5v14M5 12h14"/>'),
+  update: icon('<path d="M12 15.5V5"/><path d="M7.5 9.5L12 5l4.5 4.5"/><path d="M5 19.5h14"/>'),
   settings: icon('<path d="M4 7h8.5M16.5 7H20M4 17h2.5M10.5 17H20"/><circle cx="14.5" cy="7" r="2"/><circle cx="8.5" cy="17" r="2"/>'),
 };
 

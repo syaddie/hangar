@@ -33,8 +33,13 @@ The apps are trusted, but anything they link to might not be:
 ## Checks and merging
 
 Work on a branch. Before merging: `npm run typecheck`, `npm test` and `npm run smoke` (with the stand-in apps running).
-Stop and ask the owner before merging if a check fails, if a change touches sign-in, permissions, link routing or
-anything else security-sensitive, or if you weren't sure what was wanted.
+**Pushing `main` publishes an update** that every installed Hangar downloads and installs by itself
+(`.github/workflows/release.yml`, `src/main/updates.ts`), so a broken `main` reaches the owner's desktop within hours.
+Stop and ask the owner before merging if a check fails, if a change touches sign-in, permissions, link routing,
+updating or the release workflow, or anything else security-sensitive, or if you weren't sure what was wanted.
+
+Testing an installed build: a copy that has found an update installs it when it quits. Set `HANGAR_UPDATES=off` for
+it, or test updating under another app name (`docs/TESTING.md`), never the owner's own install.
 
 ## Keep a decisions log
 

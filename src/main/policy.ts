@@ -325,6 +325,8 @@ export interface Config {
   window: WindowBounds;
   /** Ids used before, so a removed app's id is never handed to a new one. */
   retired: string[];
+  /** The page each app was on when Hangar restarted to update, to open it there again (once). */
+  resume: Record<string, string>;
 }
 
 export const DEFAULT_SETTINGS: Settings = { theme: 'system', openAtLogin: false };
@@ -388,7 +390,15 @@ export function readConfig(raw: unknown, defaults: AppEntry[]): Config {
     ? (o.retired as unknown[]).filter((r): r is string => typeof r === 'string' && !seen.has(r)).slice(-200)
     : [];
   const activeId = typeof o.activeId === 'string' && seen.has(o.activeId) ? o.activeId : (apps[0]?.id ?? null);
-  return { version: 1, apps, activeId, settings, zoom, window: win, retired };
+  // A page to reopen must be one of that app's own: never somewhere it was sent, such as a sign-in page.
+  const resume: Record<string, string> = {};
+  if (o.resume && typeof o.resume === 'object') {
+    for (const [id, url] of Object.entries(o.resume as Record<string, unknown>)) {
+      const app = apps.find((a) => a.id === id);
+      if (app && typeof url === 'string' && url.length < 4000 && originOf(url) === originOf(app.url)) resume[id] = url;
+    }
+  }
+  return { version: 1, apps, activeId, settings, zoom, window: win, retired, resume };
 }
 
 /** Moves an item to a new place in a list (clamped), returning a new list. */
@@ -408,3 +418,25 @@ export function browserUserAgent(ua: string): string {
     .replace(/\s{2,}/g, ' ')
     .trim();
 }
+
+// ---- Updates ----
+
+/** electron-updater's errors are long and technical; this says in a sentence what went wrong and what happens next. */
+export function describeUpdateError(raw: string): string {
+  const m = raw.toLowerCase();
+  if (/\b404\b|cannot find latest|unable to find latest|no published versions|latest\.yml/.test(m)) {
+    return 'There’s no published version to fetch: the repository may still be private, or have no releases yet.';
+  }
+  if (/\b(401|403)\b|rate limit/.test(m)) return 'GitHub turned the request away for now. Hangar asks again later.';
+  if (/sha512|checksum/.test(m)) return 'The download arrived damaged, so Hangar didn’t use it. It fetches it again next time.';
+  if (/internet_disconnected|enotfound|eai_again|name_not_resolved|getaddrinfo|enetunreach|network/.test(m)) {
+    return 'This computer couldn’t reach GitHub. Hangar tries again later.';
+  }
+  if (/timed_out|etimedout|timeout|econnreset|connection_(reset|closed|refused)/.test(m)) {
+    return 'GitHub didn’t answer in time. Hangar tries again later.';
+  }
+  const first = (raw.split('\n')[0] ?? '').replace(/^error:\s*/i, '').trim();
+  if (!first) return 'The check for updates failed. Hangar tries again later.';
+  return first.length > 160 ? `${first.slice(0, 157)}…` : first;
+}
+

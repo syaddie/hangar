@@ -96,6 +96,7 @@ const titleSlot = h('div', { class: 'top-title' });
 const appName = h('span', { class: 'app-name' });
 const pageName = h('span', { class: 'page-title' });
 titleSlot.append(appName, pageName);
+const updateSlot = h('span');
 const zoomSlot = h('span');
 const downloadSlot = h('span', { class: 'tools' });
 const externalButton = h('button', {
@@ -110,7 +111,7 @@ const top = h(
   { class: 'top' },
   h('div', { class: 'tools' }, backButton, forwardButton, reloadButton),
   titleSlot,
-  h('div', { class: 'tools' }, zoomSlot, downloadSlot, externalButton),
+  h('div', { class: 'tools' }, updateSlot, zoomSlot, downloadSlot, externalButton),
 );
 const contrail = h('div', { class: 'contrail', 'aria-hidden': 'true' });
 const stage = h('main', { class: 'stage' });
@@ -390,7 +391,64 @@ function renderTop(s: ShellState, prev: ShellState | null): void {
   }
 
   renderDownloads(s, prev);
+  renderUpdate(s);
   contrail.classList.toggle('on', !!app && app.status === 'loading' && !s.sheet);
+}
+
+/** A new Hangar, downloaded and waiting: one button says so, and restarting installs it. */
+function renderUpdate(s: ShellState): void {
+  const ready = s.update.phase === 'ready' ? s.update.version : '';
+  if (updateSlot.dataset.ready === ready) return;
+  updateSlot.dataset.ready = ready;
+  updateSlot.replaceChildren(
+    ready
+      ? h(
+          'button',
+          {
+            class: 'update-pill',
+            title: `Hangar ${ready} is ready. Your apps reopen on the pages they’re on.`,
+            onclick: () => send({ type: 'restartToUpdate' }),
+          },
+          h('span', { html: ICON.update }),
+          'Restart to update',
+        )
+      : '',
+  );
+  if (ready) live.textContent = `Hangar ${ready} is ready. Restart to update.`;
+}
+
+/** What the Updates part of settings says, for each state the updater can be in. */
+function updateStatus(s: ShellState): { text: string; detail?: string; action?: { label: string; cmd: Command; primary?: boolean }; percent?: number } {
+  const at = (t?: number) => (t ? new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
+  const u = s.update;
+  switch (u.phase) {
+    case 'off':
+      return {
+        text: `Hangar ${s.version}`,
+        detail:
+          u.reason === 'source'
+            ? 'Updates come with the installed Hangar. This copy runs from its source folder, so it’s already as new as that is.'
+            : 'Updating is switched off for this copy (HANGAR_UPDATES=off).',
+      };
+    case 'idle':
+      return {
+        text: `Hangar ${s.version} is up to date.`,
+        detail: u.checkedAt ? `Checked at ${at(u.checkedAt)}. Hangar looks again every few hours.` : 'Hangar looks for a new version every few hours.',
+        action: { label: 'Check now', cmd: { type: 'checkForUpdates' } },
+      };
+    case 'checking':
+      return { text: 'Looking for a new version…', detail: `You have Hangar ${s.version}.` };
+    case 'downloading':
+      return { text: `Downloading Hangar ${u.version}`, detail: `${u.percent}%. You can keep working; it’s ready in a moment.`, percent: u.percent };
+    case 'ready':
+      return {
+        text: `Hangar ${u.version} is ready.`,
+        detail: 'Restart now, or it installs by itself next time you quit Hangar. Your apps reopen on the pages they’re on.',
+        action: { label: 'Restart to update', cmd: { type: 'restartToUpdate' }, primary: true },
+      };
+    case 'error':
+      return { text: `Hangar ${s.version}`, detail: u.message, action: { label: 'Check again', cmd: { type: 'checkForUpdates' } } };
+  }
 }
 
 function renderDownloads(s: ShellState, prev: ShellState | null): void {
@@ -574,6 +632,7 @@ function settingsSheet(): HTMLElement {
     ['Settings', [`${mod()}+,`]],
   ];
   const keyList = h('dl', { class: 'keys' });
+  const updates = h('div', { class: 'update-status', 'aria-live': 'polite' });
   for (const [what, combo] of keys) {
     keyList.append(h('dt', {}, what), h('dd', {}, ...combo.map((k) => (k === 'to' ? h('span', {}, 'to') : h('kbd', {}, k)))));
   }
@@ -604,8 +663,8 @@ function settingsSheet(): HTMLElement {
       h('h3', {}, 'Start-up'),
       h('div', { class: 'check' }, atLogin, h('label', { for: 'open-at-login' }, `Open Hangar when you sign in to ${osName()}`, loginHint)),
     ),
+    h('div', { class: 'group' }, h('h3', {}, 'Updates'), updates),
     h('div', { class: 'group' }, h('h3', {}, 'Keys'), keyList),
-    h('span', { class: 'version' }),
   ]);
 
   stageUpdate = (s) => {
@@ -628,7 +687,30 @@ function settingsSheet(): HTMLElement {
     atLogin.checked = s.settings.openAtLogin;
     atLogin.disabled = !s.packaged;
     loginHint.textContent = s.packaged ? '' : 'This works in the installed Hangar, not when it runs from its source folder.';
-    panel.querySelector('.version')!.textContent = `Hangar ${s.version}`;
+    const u = updateStatus(s);
+    const updateSig = JSON.stringify(u);
+    if (updates.dataset.sig !== updateSig) {
+      updates.dataset.sig = updateSig;
+      const action = u.action;
+      updates.replaceChildren(
+        h(
+          'div',
+          { class: 'update-text' },
+          h('strong', {}, u.text),
+          u.detail ? h('span', {}, u.detail) : null,
+          u.percent !== undefined
+            ? h(
+                'span',
+                { class: 'meter', role: 'progressbar', 'aria-valuenow': String(u.percent), 'aria-valuemin': '0', 'aria-valuemax': '100' },
+                h('span', { style: `width:${u.percent}%` }),
+              )
+            : null,
+        ),
+        ...(action
+          ? [h('button', { class: `button${action.primary ? ' primary' : ''}`, onclick: () => send(action.cmd) }, action.label)]
+          : []),
+      );
+    }
   };
   return panel;
 }

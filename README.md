@@ -31,6 +31,18 @@ The installer isn't signed, so Windows SmartScreen asks before running it the fi
 anyway"). On a managed work PC, IT policy may stop unsigned programs altogether; `npm start` from this folder still
 works then.
 
+## Updates
+
+Hangar keeps itself up to date. Every push to `main` has GitHub Actions check the code, build a new version
+(`0.1.<run number>`) and publish it as a release of `syaddie/hangar`, which must be a public repository so Hangar
+can read its releases without a password. The installed Hangar looks for a new release soon after it opens, every
+four hours and when the computer wakes, and downloads it in the background (only the parts that changed). Then a
+**Restart to update** button appears in the top bar: press it, and Hangar installs the new version and reopens with
+each app on the page it was on. Or ignore it, and the update installs itself the next time you quit Hangar.
+
+Settings › Updates shows where things stand, with **Check now**. What the updater did is logged in
+`%APPDATA%\Hangar\logs\updates.log`. Running from source (`npm start`), there's nothing to update.
+
 ## Signing in
 
 The first time each app opens, it shows Cloudflare's sign-in page inside Hangar. Sign in there once. All the apps
