@@ -5,7 +5,7 @@
 
 import type { AppState, Command, ShellState } from '../shared/types';
 import type { HangarApi } from '../preload/shell';
-import { EMPTY, ICON, LAUNCH, LOST, swatchFor } from './art';
+import { EMPTY, ICON, LAUNCH, LOST, MARK, swatchFor } from './art';
 
 declare global {
   interface Window {
@@ -83,7 +83,7 @@ const settingsButton = h('button', {
 const rail = h(
   'nav',
   { class: 'rail', 'aria-label': 'Hangar' },
-  h('div', { class: 'brand', title: 'Hangar' }, h('img', { src: '../assets/logo.svg', alt: '', draggable: 'false' })),
+  h('div', { class: 'brand', title: 'Hangar', html: MARK }),
   bays,
   selector,
   h('div', { class: 'rail-foot' }, addButton, settingsButton),
@@ -111,7 +111,7 @@ const top = h(
   { class: 'top' },
   h('div', { class: 'tools' }, backButton, forwardButton, reloadButton),
   titleSlot,
-  h('div', { class: 'tools' }, updateSlot, zoomSlot, downloadSlot, externalButton),
+  h('div', { class: 'tools end' }, updateSlot, zoomSlot, downloadSlot, externalButton),
 );
 const contrail = h('div', { class: 'contrail', 'aria-hidden': 'true' });
 const stage = h('main', { class: 'stage' });
