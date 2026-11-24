@@ -1,6 +1,10 @@
 # Every push to main builds Hangar for Windows and publishes it as a release here, which every installed Hangar
 # finds, downloads and offers by itself (src/main/updates.ts). Each version is 0.1.<run number>, so it's always newer
 # than the one before. Pull requests only run the checks.
+#
+# The release is opened first, as a draft, and published only once every file is on it. Left to electron-builder,
+# each upload raced to create the release and one was refused (run 1, v0.1.1); and a published release missing its
+# installer or latest.yml would show installed copies an update they can't fetch. Drafts are invisible to them.
 
 name: Release
 
@@ -20,6 +24,9 @@ concurrency:
 jobs:
   release:
     runs-on: windows-latest
+    env:
+      VERSION: 0.1.${{ github.run_number }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -38,10 +45,27 @@ jobs:
       - name: Number this version
         if: github.event_name != 'pull_request'
         shell: bash
-        run: npm version --no-git-tag-version "0.1.${{ github.run_number }}"
+        run: npm version --no-git-tag-version "$VERSION"
 
-      - name: Build and publish
+      - name: Open a draft release
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: >
+          gh release create "v$VERSION" --draft --target "$GITHUB_SHA"
+          --title "Hangar $VERSION"
+          --notes "Built from ${GITHUB_SHA::7}. Installed copies of Hangar find this and update to it by themselves."
+
+      - name: Build and upload
         if: github.event_name != 'pull_request'
         run: npm run release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish the release
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          assets=$(gh release view "v$VERSION" --json assets --jq '[.assets[].name] | join(" ")')
+          echo "On the release: $assets"
+          for want in "latest.yml" "Hangar-Setup-$VERSION.exe" "Hangar-Setup-$VERSION.exe.blockmap"; do
+            case " $assets " in *" $want "*) ;; *) echo "::error::v$VERSION is missing $want, so it stays a draft"; exit 1 ;; esac
+          done
+          gh release edit "v$VERSION" --draft=false --latest

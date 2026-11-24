@@ -77,7 +77,7 @@
         "provider": "github",
         "owner": "syaddie",
         "repo": "hangar",
-        "releaseType": "release"
+        "releaseType": "draft"
       }
     ]
   }
