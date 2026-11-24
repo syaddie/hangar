@@ -61,3 +61,7 @@
 - **2026-11-24: The top bar never shortens the app's name.** At the smallest window "Launchpad" was cut to "Launchp"
   while a saved file's name kept its room. The title keeps at least the app's name (`min-width: min-content`) and the
   right-hand tools (`.tools.end`) give way first.
+- **2026-11-25: The release workflow uses `actions/checkout@v7` and `actions/setup-node@v7`**, which run on Node 24.
+  The v4s ran on Node 20, which GitHub is retiring (run 3 warned it was forcing them onto Node 24). The breaking
+  changes since v4 are to automatic npm caching, and the workflow sets `cache: npm` itself; it signs in to `gh` with
+  `GH_TOKEN`, not checkout's stored credentials.
