@@ -37,3 +37,8 @@
   `HANGAR_UPDATES=off` switches it off for testing an installed copy.
 - **2026-11-24: A bay's pointer is captured only once a drag starts.** Captured on press, Chromium sent the click to the
   bay rather than its button, so clicking an app's icon did nothing. The smoke test now clicks with real mouse events.
+- **2026-11-24: Releases are opened as drafts and published last.** Run 1 failed: electron-builder's uploads each raced
+  to create the release, and GitHub refused the second ("Published releases must have a valid tag"), leaving v0.1.1
+  with only a blockmap. The workflow now creates the draft itself, electron-builder uploads into it
+  (`releaseType: draft`), and a last step publishes it only if the installer, its blockmap and `latest.yml` are all on
+  it. A half-uploaded release stays a draft, which installed copies never see.
