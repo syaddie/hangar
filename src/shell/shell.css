@@ -1,5 +1,6 @@
 /* Hangar's shell: the rail of bays, the top bar, and what the app area shows when no app is (docs/DESIGN.md).
-   It frames the apps and stays out of their way. One bright thing, the beacon, marks where you are. */
+   It frames the apps and stays out of their way, like the bezel round a flight deck's display: monochrome, with
+   colour kept for meaning. One bright thing, the beacon (the amber lead-in), marks where you are. */
 
 @font-face { font-family: 'Atkinson Next'; src: url('fonts/next-400.woff2') format('woff2'); font-weight: 400; font-display: block; }
 @font-face { font-family: 'Atkinson Next'; src: url('fonts/next-500.woff2') format('woff2'); font-weight: 500; font-display: block; }
@@ -23,84 +24,91 @@
   --space-6: 24px;
   --space-8: 32px;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-bay: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-bay: 10px;
+  --radius-lg: 14px;
 
   --dur-press: 90ms;
   --dur-hover: 160ms;
   --dur-state: 240ms;
   --dur-screen: 280ms;
-  --dur-draw: 900ms;
+  /* One run of the launch's sequenced lights along the lead-in. */
+  --dur-rabbit: 1000ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in: cubic-bezier(0.55, 0, 0.75, 0.2);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   /* A damped spring settling with a 2% overshoot, like a selector dropping into a detent. */
   --ease-dock: linear(0, 0.21 6%, 0.56 14%, 0.84 24%, 0.97 33%, 1.02 42%, 1.016 52%, 1.004 64%, 1);
-  /* y = t²: an engine spooling up, accelerating evenly, exactly. */
-  --ease-spool: cubic-bezier(0.3333, 0, 0.6667, 0.3333);
   --rise: 8px;
   --press: 0.95;
   --scale-in: 0.97;
 
+  /* Colour works as on a flight deck's displays: the legends are ink, and a colour always means one thing.
+     Cyan (select) is yours to act on; amber (beacon) is the way in; red (danger) is can't, or can't undo. */
   color-scheme: light;
-  /* Day: brushed aluminium, the hangar's sheet metal. */
-  --chrome: #e6e9ef;
-  --bay: #dde1e8;
+  /* Day: anodised aluminium. */
+  --chrome: #eceef2;
+  --bay: #e2e5ea;
   --plate: #ffffff;
   --surface: #ffffff;
-  --surface-2: #eef0f4;
-  --line: #d3d8e1;
-  --line-strong: #7f8796;
-  --ink: #161a22;
-  --ink-2: #4a5160;
-  --ink-3: #5f6776;
-  --accent: #2b4acb;
-  --on-accent: #ffffff;
-  --accent-soft: #e6ebfb;
-  --beacon: #e28a00;
-  --beacon-glow: rgba(226, 138, 0, 0.35);
+  --surface-2: #f2f4f7;
+  --line: #d6dae2;
+  --line-strong: #7b8393;
+  --ink: #12161d;
+  --ink-2: #454d5c;
+  --ink-3: #5b6372;
+  --primary: var(--ink);
+  --on-primary: #ffffff;
+  --select: #0a6d8c;
+  --on-select: #ffffff;
+  --select-soft: #dff1f6;
+  --beacon: #c27400;
+  --beacon-glow: rgba(194, 116, 0, 0.3);
   --danger: #c0271c;
-  --steel: #7d8bab;
-  --steel-dim: #a9b3c8;
-  --blade: #8a97b2;
-  --disc: #cdd3de;
-  --scrim: rgba(22, 26, 34, 0.32);
-  --shadow-overlay: 0 12px 40px rgba(22, 26, 34, 0.16);
-  --tint-hover: color-mix(in srgb, var(--ink) 6%, transparent);
-  --tint-press: color-mix(in srgb, var(--ink) 11%, transparent);
-  --accent-hover: color-mix(in srgb, var(--accent) 88%, black);
+  --danger-soft: rgba(192, 39, 28, 0.1);
+  --steel: #6f7a90;
+  --steel-dim: #959eb0;
+  --tint-hover: rgba(18, 22, 29, 0.06);
+  --tint-press: rgba(18, 22, 29, 0.11);
+  --scrim: rgba(18, 22, 29, 0.32);
+  --shadow-overlay: 0 12px 40px rgba(18, 22, 29, 0.16), 0 0 0 1px rgba(18, 22, 29, 0.06);
+  /* Monogram swatches: each holds a white letter at 4.5:1 or more. */
+  --swatch-blue: #3b6fd4;
+  --swatch-cyan: #107896;
+  --swatch-violet: #7a55c7;
+  --swatch-pink: #b5437f;
+  --swatch-brown: #8a5a3c;
+  --swatch-slate: #5b6577;
+  --on-swatch: #ffffff;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  /* Night: the hangar with its doors open on Apogee's sky. */
-  --chrome: #0d1222;
-  --bay: #111830;
-  --plate: #1a2340;
-  --surface: #151c31;
-  --surface-2: #1c2540;
-  --line: #232c47;
-  --line-strong: #6a7694;
-  --ink: #e8ecf5;
-  --ink-2: #b4bdd0;
-  --ink-3: #8f9ab2;
-  --accent: #8fa6ff;
-  --on-accent: #0b1020;
-  --accent-soft: #1b2a5c;
+  /* Night: an unlit flight deck, nearly black with a little blue in it. */
+  --chrome: #0a0e16;
+  --bay: #0f141e;
+  --plate: #1a2130;
+  --surface: #141a25;
+  --surface-2: #1c2331;
+  --line: #262e3d;
+  --line-strong: #6b7488;
+  --ink: #e9edf4;
+  --ink-2: #b3bbca;
+  --ink-3: #8d96a8;
+  --on-primary: #0a0e16;
+  --select: #62cbe6;
+  --on-select: #0a0e16;
+  --select-soft: #0f2f3a;
   --beacon: #ffb23e;
   --beacon-glow: rgba(255, 178, 62, 0.4);
   --danger: #ff8a7a;
-  --steel: #7d8bab;
-  --steel-dim: #46557a;
-  --blade: #b9c3d8;
-  --disc: #0b1020;
-  --scrim: rgba(3, 6, 14, 0.58);
-  --shadow-overlay: 0 12px 40px rgba(0, 0, 0, 0.55);
-  --tint-hover: color-mix(in srgb, var(--accent) 9%, transparent);
-  --tint-press: color-mix(in srgb, var(--accent) 16%, transparent);
-  --accent-hover: color-mix(in srgb, var(--accent) 86%, white);
+  --danger-soft: rgba(255, 138, 122, 0.12);
+  --steel: #8a95ab;
+  --steel-dim: #4b566c;
+  --tint-hover: rgba(233, 237, 244, 0.07);
+  --tint-press: rgba(233, 237, 244, 0.12);
+  --scrim: rgba(3, 5, 10, 0.6);
+  --shadow-overlay: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px #262e3d;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -108,7 +116,6 @@
     --dur-press: 0ms;
     --dur-state: 0ms;
     --dur-screen: 0ms;
-    --dur-draw: 0ms;
     --ease-dock: var(--ease-out);
     --rise: 0px;
     --press: 1;
@@ -140,7 +147,7 @@ button { cursor: default; }
    Chromium hands the first button when the window opens, shows none. */
 .keyboard :focus-visible,
 input:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--select);
   outline-offset: 2px;
   animation: lock-on var(--dur-state) var(--ease-out);
 }
@@ -169,7 +176,7 @@ input:focus-visible {
   -webkit-app-region: drag;
   flex: none;
 }
-.brand img { width: 26px; height: 26px; display: block; -webkit-user-drag: none; }
+.brand svg { width: 26px; height: 26px; display: block; }
 .mac .brand { height: calc(var(--top) + 28px); align-items: end; padding-bottom: 6px; }
 
 .bays {
@@ -213,8 +220,8 @@ input:focus-visible {
 }
 .bay-button:hover { background: var(--tint-hover); }
 .bay-button:active { transform: scale(var(--press)); transition-duration: var(--dur-press); }
-.bay[aria-current='true'] .bay-button { background: var(--plate); }
-:root:not([data-theme='dark']) .bay[aria-current='true'] .bay-button { box-shadow: 0 1px 2px rgba(22, 26, 34, 0.08), 0 0 0 1px var(--line); }
+/* The current bay sits on a plate with a hairline edge; the beacon beside it says the rest. */
+.bay[aria-current='true'] .bay-button { background: var(--plate); box-shadow: inset 0 0 0 1px var(--line); }
 
 .bay-icon {
   width: 32px;
@@ -225,7 +232,7 @@ input:focus-visible {
   pointer-events: none;
   transition: opacity var(--dur-hover) ease, filter var(--dur-hover) ease;
 }
-.bay:not([aria-current='true']) .bay-icon { opacity: 0.82; }
+.bay:not([aria-current='true']) .bay-icon { opacity: 0.78; }
 .bay:not([aria-current='true']) .bay-button:hover .bay-icon { opacity: 1; }
 
 /* An app with no icon of its own gets its first letter on a swatch. */
@@ -237,7 +244,7 @@ input:focus-visible {
   place-items: center;
   font-weight: 700;
   font-size: 16px;
-  color: #fff;
+  color: var(--on-swatch);
   pointer-events: none;
 }
 
@@ -313,13 +320,14 @@ input:focus-visible {
 }
 .button:hover { background: var(--tint-hover); }
 .button:active { transform: translateY(1px) scale(0.98); transition-duration: var(--dur-press); }
-.button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+/* Primary is ink, not blue: on a flight deck colour is kept for meaning, and the legends are white. */
+.button.primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.button.primary:hover { background: var(--ink-2); border-color: var(--ink-2); }
 .button.quiet { border-color: transparent; color: var(--ink-2); }
 .button.quiet:hover { color: var(--ink); }
 .button.danger { border-color: transparent; color: var(--danger); padding-inline: var(--space-2); }
-.button.danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
-.button.danger.solid { background: var(--danger); border-color: var(--danger); color: var(--on-accent); padding-inline: var(--space-4); }
+.button.danger:hover { background: var(--danger-soft); }
+.button.danger.solid { background: var(--danger); border-color: var(--danger); color: var(--on-primary); padding-inline: var(--space-4); }
 .button:disabled { opacity: 0.5; }
 
 /* ---------------------------------------------------------------- the top bar */
@@ -340,7 +348,8 @@ input:focus-visible {
 
 .top-title {
   flex: 1 1 auto;
-  min-width: 0;
+  /* Never narrower than the app's name: the page title and the tools give way first. */
+  min-width: min-content;
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
@@ -359,6 +368,10 @@ input:focus-visible {
 @keyframes title-in { from { opacity: 0; transform: translateY(3px); } }
 
 .tools { display: flex; align-items: center; gap: 2px; flex: none; }
+/* The tools on the right give way before the app's name does: a saved file's name shortens first. */
+.tools.end { flex: 0 1 auto; min-width: 0; }
+.tools.end > * { flex: none; }
+.tools.end > .tools { flex: 0 1 auto; min-width: 0; }
 
 .zoom-pill {
   height: 26px;
@@ -382,7 +395,9 @@ input:focus-visible {
 .download-ring circle { fill: none; stroke-width: 2; }
 .download-ring .track { stroke: var(--line); }
 .download-ring .fill { stroke: var(--beacon); stroke-linecap: round; transition: stroke-dashoffset var(--dur-state) linear; }
-.download-done {
+.tools > .download-done {
+  flex: 0 1 auto;
+  min-width: 48px;
   color: var(--ink-2);
   font-size: 13px;
   white-space: nowrap;
@@ -484,37 +499,36 @@ input:focus-visible {
 .panel p { margin: 0; color: var(--ink-2); font-size: 16px; line-height: 24px; }
 .panel .readout { font: 500 12px/16px var(--mono); color: var(--ink-3); letter-spacing: 0.02em; margin-top: var(--space-1); }
 .panel .actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap; justify-content: center; }
-/* The fan drawings (src/shell/art.ts). Running, its spiral is the beacon's amber; shut down, everything is steel. */
+/* The hangar drawings (src/shell/art.ts), the logo's own: frames receding to a low vanishing point, the door rail, and
+   the amber lead-in. Can't reach an app: the hangar is dark. An empty hangar: the other frames marked out, dashed. */
 .panel .drawing { width: 112px; height: 112px; display: block; }
-.drawing .disc, .launch .disc { fill: var(--disc); }
-.drawing .blades, .launch .blades { fill: var(--blade); }
-.drawing .spinner, .launch .spinner { fill: var(--ink); }
-.drawing .spiral, .launch .spiral { stroke: var(--beacon); }
-.drawing .nacelle, .launch .nacelle { stroke: var(--ink); }
-.drawing.off .blades { fill: var(--steel-dim); }
-.drawing.off .spinner, .drawing.off .nacelle { fill: var(--steel); stroke: var(--steel); }
-.drawing.off .nacelle { fill: none; }
-.drawing.off .spiral { stroke: var(--disc); }
-.drawing.empty .nacelle { stroke: var(--steel); }
-.drawing.empty .marking { stroke: var(--steel-dim); }
+.art .frame { fill: none; stroke-linecap: round; }
+.art .near { stroke: var(--ink); }
+.art .mid { stroke: var(--steel); }
+.art .far { stroke: var(--steel-dim); }
+.art .rail { fill: none; stroke: var(--steel-dim); stroke-linecap: round; }
+.art .lead { fill: var(--beacon); }
+.art .lead.unlit { fill: var(--beacon-glow); }
+.lost .near, .empty .near { stroke: var(--steel); }
+.lost .lead.unlit { fill: var(--steel-dim); }
 
 /* Opening an app that hasn't loaded before: its icon, waiting on the pad. */
 .opening .app-mark { width: 56px; height: 56px; border-radius: 14px; }
 .opening .app-mark.monogram { font-size: 24px; }
 .opening p { font-size: 14px; line-height: 20px; }
 
-/* The launch: the engine spools up and runs at idle while the first app loads. Spool-up turns the fan through
-   180° with its angle growing as t², ending at 225°/s; idle carries on at 225°/s, so the hand-over is seamless. */
+/* The launch: while the first app loads, the frames light front to back, then four lights along the lead-in flash in
+   turn toward the hangar, once a second, like an approach's sequenced flashing lights, until the app is ready. */
 .launch { display: grid; justify-items: center; gap: var(--space-4); }
 .launch svg { width: 120px; height: 120px; }
-.launch .spool, .launch .idle { transform-box: view-box; transform-origin: 50% 50%; }
-.launch .spool { animation: spool 1.6s var(--ease-spool) 150ms both; }
-.launch .idle { animation: idle 1.6s linear 1.75s infinite; }
-@keyframes spool { from { transform: rotate(0deg); } to { transform: rotate(-180deg); } }
-@keyframes idle { to { transform: rotate(-360deg); } }
+.launching .frame { animation: frame-on 420ms var(--ease-out) both; animation-delay: calc(var(--i) * 110ms + 120ms); }
+@keyframes frame-on { from { opacity: 0; } }
+.launching .light { fill: var(--beacon); opacity: 0.2; animation: rabbit var(--dur-rabbit) linear infinite; animation-delay: calc(var(--i) * 90ms + 600ms); }
+@keyframes rabbit { 0% { opacity: 0.2; } 6% { opacity: 1; } 24% { opacity: 0.2; } 100% { opacity: 0.2; } }
 .launch p { margin: 0; color: var(--ink-2); animation: panel-in var(--dur-screen) var(--ease-out) 500ms both; }
 @media (prefers-reduced-motion: reduce) {
-  .launch .spool, .launch .idle { animation: none; }
+  .launching .frame, .launching .light { animation: none; }
+  .launching .light { opacity: 0.6; }
 }
 
 /* ---------------------------------------------------------------- sheets */
@@ -544,7 +558,6 @@ input:focus-visible {
   animation: sheet-in var(--dur-screen) var(--ease-dock);
   overflow: hidden;
 }
-:root[data-theme='dark'] .sheet { box-shadow: var(--shadow-overlay), 0 0 0 1px var(--line); }
 @keyframes sheet-in { from { opacity: 0; transform: translateY(var(--rise)) scale(var(--scale-in)); } }
 
 .sheet-head {
@@ -567,7 +580,8 @@ input:focus-visible {
 .sheet-foot .spacer { flex: 1; }
 
 .group { display: grid; gap: var(--space-2); }
-.group h3 { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink-2); }
+/* Placards: mono capitals over each group, like the stencilled labels on an instrument panel. */
+.group h3 { margin: 0; font: 500 12px/16px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
 .hint { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 20px; }
 
 .app-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
@@ -588,25 +602,24 @@ input:focus-visible {
 .add-row { margin-top: var(--space-1); justify-self: start; display: inline-flex; align-items: center; gap: var(--space-2); }
 .add-row svg { width: 16px; height: 16px; }
 
-.segmented { display: inline-flex; padding: 3px; border-radius: var(--radius-md); background: var(--surface-2); gap: 2px; justify-self: start; position: relative; }
+.segmented { display: inline-flex; padding: 3px; border-radius: var(--radius-md); background: var(--bay); gap: 2px; justify-self: start; position: relative; }
 .segmented button {
   height: 30px;
   padding: 0 var(--space-3);
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--ink-2);
   font-weight: 500;
   transition: color var(--dur-hover) ease, background-color var(--dur-state) var(--ease-dock);
 }
 .segmented button:hover { color: var(--ink); }
-.segmented button[aria-pressed='true'] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
-:root[data-theme='dark'] .segmented button[aria-pressed='true'] { background: var(--plate); }
+.segmented button[aria-pressed='true'] { background: var(--plate); color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
 
 .check { display: flex; gap: var(--space-3); align-items: flex-start; }
 .check input { appearance: none; width: 20px; height: 20px; margin: 2px 0 0; border: 1.5px solid var(--line-strong); border-radius: 5px; display: grid; place-items: center; flex: none; transition: background-color var(--dur-state) ease, border-color var(--dur-state) ease; }
-.check input:checked { background: var(--accent); border-color: var(--accent); }
-.check input:checked::after { content: ''; width: 10px; height: 6px; border: 2px solid var(--on-accent); border-top: 0; border-right: 0; transform: translate(0, -1px) rotate(-45deg); animation: pop-in var(--dur-state) var(--ease-dock); }
+.check input:checked { background: var(--select); border-color: var(--select); }
+.check input:checked::after { content: ''; width: 10px; height: 6px; border: 2px solid var(--on-select); border-top: 0; border-right: 0; transform: translate(0, -1px) rotate(-45deg); animation: pop-in var(--dur-state) var(--ease-dock); }
 .check input:disabled { opacity: 0.5; }
 .check label { display: grid; gap: 2px; }
 .check label span { color: var(--ink-2); }
@@ -636,24 +649,24 @@ kbd {
   user-select: text;
   transition: border-color var(--dur-hover) ease;
 }
-.field input:focus-visible { outline-offset: 0; border-color: var(--accent); }
+.field input:focus-visible { outline-offset: 0; border-color: var(--select); }
 .field input[aria-invalid='true'] { border-color: var(--danger); }
 .field .error { color: var(--danger); margin: 0; animation: title-in var(--dur-state) var(--ease-out); }
 .confirm { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; animation: title-in var(--dur-state) var(--ease-out); }
 .confirm span { color: var(--ink-2); margin-right: var(--space-1); }
-.version { color: var(--ink-3); font: 500 12px/16px var(--mono); }
+.version { color: var(--ink-3); font: 500 12px/16px var(--mono); letter-spacing: 0.02em; }
 
 /* ---------------------------------------------------------------- updates */
 
-/* A new Hangar is ready: the one button for it, in the accent, as an action rather than a warning. */
+/* A new Hangar is ready: the one button for it, in cyan (yours to act on), as an action rather than a warning. */
 .update-pill {
   height: 28px;
   padding: 0 var(--space-3) 0 var(--space-2);
   margin-right: var(--space-2);
   border: 0;
   border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--select-soft);
+  color: var(--select);
   font-weight: 600;
   font-size: 13px;
   display: inline-flex;
@@ -664,7 +677,7 @@ kbd {
   animation: pop-in var(--dur-state) var(--ease-dock);
   transition: background-color var(--dur-hover) ease, transform var(--dur-screen) var(--ease-dock);
 }
-.update-pill:hover { background: color-mix(in srgb, var(--accent-soft) 80%, var(--accent)); }
+.update-pill:hover { background: color-mix(in srgb, var(--select-soft) 80%, var(--select)); }
 .update-pill:active { transform: scale(var(--press)); transition-duration: var(--dur-press); }
 .update-pill svg { width: 16px; height: 16px; display: block; }
 
@@ -673,4 +686,4 @@ kbd {
 .update-text strong { font-weight: 500; font-size: 16px; line-height: 22px; }
 .update-text span { color: var(--ink-2); }
 .update-text .meter { display: block; height: 4px; border-radius: 2px; background: var(--surface-2); margin-top: var(--space-2); overflow: hidden; }
-.update-text .meter span { display: block; height: 100%; background: var(--accent); border-radius: 2px; transition: width var(--dur-state) linear; }
+.update-text .meter span { display: block; height: 100%; background: var(--select); border-radius: 2px; transition: width var(--dur-state) linear; }

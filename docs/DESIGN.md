@@ -2,19 +2,26 @@
 
 ## The feel
 
-The hangar the owner's apps are parked in: a quiet frame of sheet metal around them, so each app looks as it does on
-its own. It's from the same family as Apogee (its night sky, its type, its motion) and takes the aerospace character
-in the details:
+The bezel round a flight deck's display: the shell frames the apps and stays out of their way, so each app looks as it
+does on its own. The aerospace character comes from how a flight deck is designed, not from pictures of aircraft. The
+full system, with live previews of every part, is the **Hangar** design system artifact
+(https://claude.ai/artifact/SaJRisVSbrApxTfd32eRGB); this file is its summary for the code.
 
-- the logo is a turbofan seen head-on, fourteen swept blades in their nacelle, with the spiral painted on the spinner
-  (the owner's choice, 2026-11-24);
-- **the beacon**, the one bright thing: the amber bar beside the app you're in, which glides between bays and settles
-  like a selector dropping into a detent. The spinner's spiral is the same amber: amber means running;
-- the launch: while the first app loads, the engine starts. The fan spools up from rest (its angle growing as t²) and
-  hands over to a steady idle at exactly the speed spool-up ended on, so there's no jolt, until the app is ready;
+- **Colour only means something**, as on a glass cockpit: the legends are ink and grey, primary buttons are ink (not
+  blue), cyan (`select`) is yours to act on (focus, a ticked box, Restart to update), red (`danger`) is can't or can't
+  undo;
+- **the beacon**, the one bright thing: the amber lead-in line beside the app you're in, like the yellow line that
+  leads an aircraft into its stand. It glides between bays and settles like a selector dropping into a detent. Amber is
+  the beacon and things on their way in (the contrail, a download, the launch), nothing else;
+- **placards**: each group in a sheet is headed by mono capitals in `ink-3`, like the stencilled labels on a panel;
+- **the logo** is the mouth of a hangar seen from the apron: four parabolic frames receding to a low vanishing point,
+  the door rail across the threshold, the amber lead-in running inside. The frames are also the apps, parked one behind
+  another (the owner's choice, 2026-11-24; `logos/hangar.mjs`);
+- the launch: while the first app loads, the hangar's frames light front to back, then four lights along the lead-in
+  flash in turn toward the hangar once a second, like an approach's sequenced flashing lights, until the app is ready;
 - loading is a contrail along the app's top edge;
-- an app that can't be reached shows the engine shut down: blades still, everything steel, the spiral unlit;
-- an empty hangar shows a nacelle with no fan fitted yet, the place for it marked out.
+- an app that can't be reached shows the hangar dark: every frame steel, the lead-in unlit;
+- an empty hangar shows the front frame and the rail, the other frames marked out dashed where they'll stand.
 
 ## Layout
 
@@ -41,30 +48,36 @@ because nothing the shell draws can sit on top of a live view.
 
 ## Tokens
 
-CSS variables in `src/shell/shell.css`, named as Apogee's are where they mean the same thing.
+CSS variables in `src/shell/shell.css`, the same names and values as the design system's `tokens.json`. Every text
+pair is at least 4.5:1, and every control edge, ring and meaningful mark 3:1, in both themes.
 
-| Token | Light (aluminium) | Dark (night) | Use |
+| Token | Day (anodised aluminium) | Night (unlit flight deck) | Use |
 |---|---|---|---|
-| `chrome` | `#e6e9ef` | `#0d1222` | The rail and top bar; also the window and title-bar overlay (`CHROME` in `src/main/hangar.ts`) |
-| `bay` | `#dde1e8` | `#111830` | The app area when no app covers it |
-| `plate` | `#ffffff` | `#1a2340` | The current bay |
-| `surface` | `#ffffff` | `#151c31` | Sheets, fields |
-| `surface-2` | `#eef0f4` | `#1c2540` | Quiet fills: the segmented control, keys |
-| `line` / `line-strong` | `#d3d8e1` / `#7f8796` | `#232c47` / `#6a7694` | Hairlines / control borders |
-| `ink`, `ink-2`, `ink-3` | `#161a22`, `#4a5160`, `#5f6776` | `#e8ecf5`, `#b4bdd0`, `#8f9ab2` | Text; nothing lighter than `ink-3` carries words |
-| `accent` | `#2b4acb` | `#8fa6ff` | Primary buttons, focus rings (Apogee's) |
-| `beacon` | `#e28a00` | `#ffb23e` | The selector, the spinner's spiral, the contrail, download progress. Nothing else |
-| `blade`, `disc` | `#8a97b2`, `#cdd3de` | `#b9c3d8`, `#0b1020` | The fan drawings' blades and the dark behind them |
-| `danger` | `#c0271c` | `#ff8a7a` | Removing, and an app's "can't be reached" light |
+| `chrome` | `#eceef2` | `#0a0e16` | The rail and top bar; also the window and title-bar overlay (`CHROME` in `src/main/hangar.ts`) |
+| `bay` | `#e2e5ea` | `#0f141e` | The app area when no app covers it; the segmented control's track |
+| `plate` | `#ffffff` | `#1a2130` | The current bay (with a `line` edge), the picked segment |
+| `surface` | `#ffffff` | `#141a25` | Sheets, fields |
+| `surface-2` | `#f2f4f7` | `#1c2331` | Quiet fills: keys, meter tracks |
+| `line` / `line-strong` | `#d6dae2` / `#7b8393` | `#262e3d` / `#6b7488` | Hairlines / control borders |
+| `ink`, `ink-2`, `ink-3` | `#12161d`, `#454d5c`, `#5b6372` | `#e9edf4`, `#b3bbca`, `#8d96a8` | Text; nothing lighter than `ink-3` carries words |
+| `primary` / `on-primary` | `ink` / `#ffffff` | `ink` / `#0a0e16` | The one primary button |
+| `select` / `-soft` / `on-` | `#0a6d8c` / `#dff1f6` / `#ffffff` | `#62cbe6` / `#0f2f3a` / `#0a0e16` | Cyan, yours to act on: focus rings, ticks, Restart to update |
+| `beacon` / `-glow` | `#c27400` | `#ffb23e` | The lead-in beside your bay, the drawings' lead-in, the contrail, download progress. Nothing else |
+| `danger` / `-soft` | `#c0271c` | `#ff8a7a` | Removing, field errors, and an app's "can't be reached" light |
+| `steel`, `steel-dim` | `#6f7a90`, `#959eb0` | `#8a95ab`, `#4b566c` | The hangar drawings' farther frames and rail; never text |
+| `swatch-*`, `on-swatch` | six colours, white letter | the same | Monograms for apps with no icon, each 4.5:1 or more |
 
-Type: Atkinson Hyperlegible Next for words, Atkinson Hyperlegible Mono for figures (zoom, find counts, error codes,
-keys), both bundled. Sizes follow Apogee's: 20/26 titles, 16/24 body in sheets, 14/20 in the chrome, 12/16 mono.
+Type: Atkinson Hyperlegible Next for words, Atkinson Hyperlegible Mono for placards and figures (zoom, find counts,
+error codes, keys, the version), both bundled. 20/26 titles, 16/24 body in sheets, 14/20 in the chrome, 12/16 mono;
+placards are mono capitals tracked 0.08em.
 
-Radius: 6 tags and keys, 10 buttons, fields and the app, 12 bays, 16 sheets.
+Radius: 4 keys, 8 buttons, icon buttons and fields, 10 bays and the app, 14 sheets and lists. Tighter than a phone
+app's, like machined parts. Everything sits flat; the only shadow is `shadow-overlay`, under a sheet or a dragged bay.
 
-Motion: Apogee's durations and curves (`dur-press` 90 to `dur-draw` 900, `ease-out`, `ease-dock`), plus `ease-spool`
-(exactly t²) for the fan spooling up. Everything moving answers something the owner did, except the launch and the contrail, which say
-something is loading. With reduced motion, things change in place.
+Motion: `dur-press` 90, `dur-hover` 160, `dur-state` 240, `dur-screen` 280, `dur-rabbit` 1000 (one run of the launch's
+lights); `ease-out`, `ease-in-out`, and `ease-dock`, a damped spring with a 2% overshoot. Everything moving answers
+something the owner did, except the launch and the contrail, which say something is loading. With reduced motion,
+things change in place and the launch's lights hold still.
 
 ## Words
 
@@ -75,7 +88,7 @@ do, never "something went wrong": "127.0.0.1:4399 turned the connection away. Th
 ## Rules for whoever builds a screen
 
 1. Use the tokens; no raw colours or sizes in a component.
-2. The beacon marks where you are. Don't use amber for anything else.
+2. The beacon marks where you are, and amber the way in. Don't use amber for anything else, or blue for buttons.
 3. The shell can't draw over a live app. Anything that must cover one is a sheet (a still behind it) or a native
    menu or dialog.
 4. Every bay action is in its right-click menu too, and every right-click menu item is reachable from the keyboard.

@@ -44,8 +44,8 @@ import { Updates } from './updates';
 
 /** The chrome's colours, for what Electron paints itself: the window behind the views and the window controls. */
 const CHROME = {
-  light: { bg: '#e6e9ef', ink: '#161a22' },
-  dark: { bg: '#0d1222', ink: '#e8ecf5' },
+  light: { bg: '#eceef2', ink: '#12161d' },
+  dark: { bg: '#0a0e16', ink: '#e9edf4' },
 } as const;
 
 const PARTITION = 'persist:hangar';

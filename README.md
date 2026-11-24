@@ -84,11 +84,13 @@ Downloads go straight to your Downloads folder, as in a browser; the arrow in th
 
 ## The logo
 
-Hangar's logo is **Fan**: a turbofan seen head-on, with the spiral painted on its spinner. The app's own drawings
-use the same fan: it spools up while the first app loads, sits shut down when an app can't be reached, and an empty
-hangar shows a nacelle with no fan fitted yet. The other ideas (Trajectory, Airfoil, Transfer) are still in `logos/`,
-with `logos/preview.html` to compare them. `npm run icons -- <name>` remakes the icons from one, though the drawings
-would then want redrawing to match.
+Hangar's logo is the mouth of a hangar seen from the apron: four parabolic frames receding to a low vanishing point,
+the door rail across the threshold, and the amber lead-in line running inside. The app's own drawings use the same
+hangar: its lights come on and the lead-in's lights run inward while the first app loads, it sits dark when an app
+can't be reached, and an empty hangar shows its frames marked out. `node logos/hangar.mjs` draws the logo files and
+`npm run icons -- hangar` remakes the app's icons from them. The earlier ideas (Fan, Trajectory, Airfoil, Transfer)
+are still in `logos/`, with `logos/preview.html` to compare them; the drawings would want redrawing to match one.
+The whole look is set out in `docs/DESIGN.md` and the Hangar design system.
 
 ## Where things live
 

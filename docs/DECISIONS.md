@@ -42,3 +42,22 @@
   with only a blockmap. The workflow now creates the draft itself, electron-builder uploads into it
   (`releaseType: draft`), and a last step publishes it only if the installer, its blockmap and `latest.yml` are all on
   it. A half-uploaded release stays a draft, which installed copies never see.
+- **2026-11-24: A design system of its own, themed on a flight deck** (the owner asked for a cleaner look in an
+  aerospace theme). It lives as the Hangar design system artifact; `docs/DESIGN.md` summarises it. The shell is
+  monochrome and colour only means something, as on a glass cockpit: primary buttons are ink rather than Apogee's blue,
+  cyan (`select`) is yours to act on, red is can't. Night moved from Apogee's navy to a near-black with a little blue,
+  so the bezel reads apart from the apps inside it. Radii tightened (4/8/10/14), and group headings became mono
+  placards.
+- **2026-11-24: The beacon stays amber, now as the lead-in line** into the bay you're in (airfield lead-in lines are
+  yellow), rather than "amber means running". Magenta (the FMS route colour) was considered and not tried: beside
+  cyan on near-black it would risk reading as neon, and the owner had already chosen amber.
+- **2026-11-24: The logo is the hangar mouth, replacing Fan**, the owner's pick of the new design. Four parabolic frames
+  (each a quadratic Bézier, so an exact parabola) recede toward a vanishing point set low, at the eye height of someone
+  on the apron, with the door rail and the amber lead-in. The first draft, with the vanishing point high and no rail,
+  read as a Wi-Fi signal. `logos/hangar.mjs` draws it; `npm run icons -- hangar` uses its three-frame cut for 32px and
+  below, where four frames merge. The rail draws the mark inline (`MARK` in `src/shell/art.ts`) so it follows the
+  theme. The launch became the frames lighting up and sequenced lights running along the lead-in; can't-reach, the
+  hangar dark; the empty hangar, the frames marked out.
+- **2026-11-24: The top bar never shortens the app's name.** At the smallest window "Launchpad" was cut to "Launchp"
+  while a saved file's name kept its room. The title keeps at least the app's name (`min-width: min-content`) and the
+  right-hand tools (`.tools.end`) give way first.
