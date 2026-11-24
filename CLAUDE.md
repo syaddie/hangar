@@ -37,6 +37,8 @@ Work on a branch. Before merging: `npm run typecheck`, `npm test` and `npm run s
 (`.github/workflows/release.yml`, `src/main/updates.ts`), so a broken `main` reaches the owner's desktop within hours.
 Stop and ask the owner before merging if a check fails, if a change touches sign-in, permissions, link routing,
 updating or the release workflow, or anything else security-sensitive, or if you weren't sure what was wanted.
+Otherwise there's nothing to ask: once the checks pass, commit, merge the branch into `main` and push it without
+asking first (the owner's standing instruction, 2026-11-24), then say what was released.
 
 Testing an installed build: a copy that has found an update installs it when it quits. Set `HANGAR_UPDATES=off` for
 it, or test updating under another app name (`docs/TESTING.md`), never the owner's own install.
