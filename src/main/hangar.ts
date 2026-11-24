@@ -40,6 +40,7 @@ import * as P from './policy';
 import { Store } from './store';
 import { Downloads } from './downloads';
 import { pageMenu } from './menus';
+import { Updates } from './updates';
 
 /** The chrome's colours, for what Electron paints itself: the window behind the views and the window controls. */
 const CHROME = {
@@ -87,6 +88,9 @@ export class Hangar {
   private htmlFullscreen: string | null = null;
   private pushQueued = false;
   private preloaded = false;
+  private updates: Updates;
+  /** Pages to reopen once, after a restart to update (Config.resume). */
+  private resume: Record<string, string>;
 
   constructor(private opts: HangarOptions) {
     this.store = opts.store;
@@ -112,6 +116,12 @@ export class Hangar {
     this.ses = session.fromPartition(PARTITION);
     this.prepareSession();
     this.downloads = new Downloads(this.ses, () => this.push());
+    this.updates = new Updates(() => this.push());
+    this.resume = { ...cfg.resume };
+    if (Object.keys(cfg.resume).length) {
+      cfg.resume = {};
+      this.store.save();
+    }
 
     this.shellView = new WebContentsView({
       webPreferences: {
@@ -240,6 +250,7 @@ export class Hangar {
       version: app.getVersion(),
       platform: process.platform,
       packaged: app.isPackaged,
+      update: this.updates.state,
     };
   }
 
@@ -264,8 +275,12 @@ export class Hangar {
   }
 
   /** Makes the app's view and starts loading it. */
-  private open(bay: Bay, url = bay.entry.url): void {
+  private open(bay: Bay, url?: string): void {
     if (bay.view) return;
+    // After a restart to update, an app opens on the page it was on.
+    const resumed = this.resume[bay.entry.id];
+    delete this.resume[bay.entry.id];
+    url ??= resumed ?? bay.entry.url;
     const view = new WebContentsView({
       webPreferences: {
         session: this.ses,
@@ -879,11 +894,29 @@ export class Hangar {
       case 'clearDownloads':
         this.downloads.clear();
         break;
+      case 'checkForUpdates':
+        this.updates.check();
+        break;
+      case 'restartToUpdate':
+        this.rememberPlaces();
+        this.store.saveNow();
+        this.updates.restart();
+        break;
       case 'focusApp':
         this.focusActive();
         break;
     }
     return { ok: true };
+  }
+
+  /** Notes the page each app is on, so they reopen there after the restart. Only an app's own pages count. */
+  private rememberPlaces(): void {
+    const resume: Record<string, string> = {};
+    for (const b of this.bays.values()) {
+      const url = b.view?.webContents.getURL();
+      if (url && !b.error && P.originOf(url) === P.originOf(b.entry.url)) resume[b.entry.id] = url;
+    }
+    this.store.config.resume = resume;
   }
 
   private addApp(input: string, name?: string): CommandResult {

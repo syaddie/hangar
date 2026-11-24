@@ -3,6 +3,7 @@ import {
   appForUrl,
   browserUserAgent,
   describeLoadError,
+  describeUpdateError,
   isTransient,
   manifestName,
   moveItem,
@@ -307,5 +308,34 @@ describe('small helpers', () => {
     expect(freeName('C:/d', 'notes.txt', exists).replace(/\\/g, '/')).toBe('C:/d/notes.txt');
     expect(freeName('C:/d', '../../evil?.exe', exists).replace(/\\/g, '/')).toBe('C:/d/evil_.exe');
     expect(freeName('C:/d', '', exists).replace(/\\/g, '/')).toBe('C:/d/download');
+  });
+});
+
+describe('updates', () => {
+  it('puts the updater’s errors into a sentence', () => {
+    expect(describeUpdateError('HttpError: 404 \n"method: GET url: https://github.com/syaddie/hangar/releases.atom"')).toMatch(/private, or have no releases/);
+    expect(describeUpdateError('Error: net::ERR_INTERNET_DISCONNECTED')).toMatch(/couldn’t reach GitHub/);
+    expect(describeUpdateError('getaddrinfo ENOTFOUND github.com')).toMatch(/couldn’t reach GitHub/);
+    expect(describeUpdateError('sha512 checksum mismatch, expected abc')).toMatch(/damaged/);
+    expect(describeUpdateError('HttpError: 403 rate limit exceeded')).toMatch(/turned the request away/);
+    expect(describeUpdateError('Error: something odd\n    at stack line')).toBe('something odd');
+    expect(describeUpdateError('')).toMatch(/failed/);
+    expect(describeUpdateError('x'.repeat(400)).length).toBeLessThanOrEqual(158);
+  });
+
+  it('reopens an app only on its own pages after a restart', () => {
+    const c = readConfig(
+      {
+        apps,
+        resume: {
+          apogee: 'https://apogee.syaddy.com/courses/12',
+          launchpad: 'https://syaddy.cloudflareaccess.com/cdn-cgi/access/login',
+          gone: 'https://gone.example.com/',
+        },
+      },
+      [],
+    );
+    expect(c.resume).toEqual({ apogee: 'https://apogee.syaddy.com/courses/12' });
+    expect(readConfig({ apps, resume: 'nope' }, []).resume).toEqual({});
   });
 });
